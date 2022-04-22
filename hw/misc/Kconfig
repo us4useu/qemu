@@ -171,4 +171,9 @@ config SIFIVE_U_PRCI
 config VIRT_CTRL
     bool
 
+config US4US_US4OEM
+    bool
+    default y if TEST_DEVICES
+    depends on PCI && MSI_NONBROKEN
+
 source macio/Kconfig
