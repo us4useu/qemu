@@ -195,7 +195,7 @@ static void dma_rw(Us4OEMState *us4oem, bool write, dma_addr_t *val, dma_addr_t 
 static uint64_t us4oem_pcidma_region_read(void *opaque, hwaddr addr,
                                           unsigned size)
 {
-    printf("Reading pcidma address: %lu, size: %u\n", addr, size);
+    printf("Reading pcidma address: %llu, size: %u\n", addr, size);
     printf("NOTE: us4oem firmware currently doesn't use device DMA space."
            "This simulator will always return 0.\n");
     return 0ull;
@@ -204,7 +204,7 @@ static uint64_t us4oem_pcidma_region_read(void *opaque, hwaddr addr,
 static void us4oem_pcidma_region_write(void *opaque, hwaddr addr, uint64_t val,
                                        unsigned size)
 {
-    printf("Writing pcidma address: %lu, value: %lu, size: %u\n", addr, val, size);
+    printf("Writing pcidma address: %llu, value: %llu, size: %u\n", addr, val, size);
     printf("NOTE: us4oem firmware currently doesn't use device DMA space.\n");
 }
 
@@ -227,7 +227,7 @@ static const MemoryRegionOps us4oem_pcidma_region_ops = {
 // ARRIA MAIN MEMORY REGION (64 MiB)
 static uint64_t us4oem_mem_read(void *opaque, hwaddr addr, unsigned size)
 {
-    printf("Reading us4oem address: %lu, size: %u\n", addr, size);
+    printf("Reading us4oem address: %llu, size: %u\n", addr, size);
     Us4OEMState* us4oem = US4OEM(opaque);
     uint64_t val = 0;
 
@@ -385,9 +385,9 @@ static void *us4oem_fact_thread(void *opaque)
         qatomic_and(&us4oem->status, ~US4OEM_STATUS_COMPUTING);
 
         if (qatomic_read(&us4oem->status) & US4OEM_STATUS_IRQFACT) {
-            qemu_mutex_lock_iothread();
+            bql_lock();
             us4oem_raise_irq(us4oem, FACT_IRQ);
-            qemu_mutex_unlock_iothread();
+            bql_unlock();
         }
     }
 
